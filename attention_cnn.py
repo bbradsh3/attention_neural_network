@@ -24,7 +24,7 @@ train_generator = train_datagen.flow_from_directory(
     os.path.join(data_path, "train"),  # adds train to data_path to specify training folder
                                        # can also use directory="<data-path>
     target_size=(128, 128),  # size of input images
-    batch_size=32,  # number of images to be used per batch
+    batch_size=50,  # number of images to be used per batch
     class_mode='binary'  # setting the number of classes to predict "binary" for two "categorical"
                          # can also set to "input" for Autoencoder system for input and output probably the same
                          # shuffle=True, to shuffle order of image being used, otherwise "False"
@@ -35,7 +35,7 @@ train_generator = train_datagen.flow_from_directory(
 val_generator = val_datagen.flow_from_directory(
     os.path.join(data_path, "valid"),
     target_size=(128, 128),
-    batch_size=32,
+    batch_size=50,
     class_mode='binary',
     shuffle=True
 )
@@ -44,7 +44,7 @@ val_generator = val_datagen.flow_from_directory(
 test_generator = val_datagen.flow_from_directory(
     os.path.join(data_path, "test"),
     target_size=(128, 128),
-    batch_size=32,
+    batch_size=50,
     class_mode='binary',
     shuffle=False
 )

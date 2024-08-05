@@ -1,13 +1,10 @@
-import numpy
 import os
-import matplotlib
 import matplotlib.pyplot as plt
 from keras.models import Model
 from keras.layers import Input, Conv2D, MaxPooling2D, Flatten, Dense, GlobalAveragePooling2D, multiply, Dropout
 from keras_preprocessing.image import ImageDataGenerator
 from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, EarlyStopping
 from keras.utils import plot_model
-from PIL import Image
 import timeit
 
 # sets path to dataset
@@ -49,8 +46,7 @@ test_generator = val_datagen.flow_from_directory(
     shuffle=False
 )
 
-#display sample images from training set with FILENAMES and TRAINING LABELS
-
+#  display sample images from training set with FILENAMES and TRAINING LABELS
 class_indices = train_generator.class_indices
 # float values in inches
 plt.figure(figsize=(5, 5))
@@ -68,7 +64,7 @@ for i in range(6):
     plt.imshow(img[0])
     # generates and formats title to print for each image
     # os.path.basename(img_filename) prints the file name os.path.basename() pulls the base filename from specified path
-    # img_class is class name as specified by sub-directory
+    # img_class is class name as specified by subdirectory
     plt.title(f"Image: {os.path.basename(img_filename)}\nLabel: {img_class}")
     plt.axis('off')
 
@@ -94,6 +90,10 @@ x = Conv2D(128, (3, 3), activation='relu')(x)
 x = MaxPooling2D((2, 2))(x)
 x = Dropout(0.25)(x)
 
+# Attention Layer
+attention = Conv2D(1, (1, 1), activation='sigmoid')(x)
+x = multiply([x, attention])
+
 x = Flatten()(x)
 x = Dense(128, activation='relu')(x)
 x = Dropout(0.5)(x)
@@ -116,7 +116,7 @@ plot_model(model, to_file='model_architecture.png', show_shapes=True, show_layer
 # allows customization of training behavior
 # allows response to certain events during training
 # examples include saving best model, reducing learning rate, and early stopping
-checkpoint = ModelCheckpoint("./model/best_cnn_ai_detection.keras",
+checkpoint = ModelCheckpoint("./model/real_fake_classification.keras",
                              monitor='val_accuracy',
                              verbose=1,
                              save_best_only=True,
@@ -139,8 +139,56 @@ history = model.fit(
     train_generator,
     epochs=100,
     validation_data=val_generator,
-    callbacks=[checkpoint, reduce_lr, early_stopping]  # Use the checkpoint to save the best model
+    # Use checkpoint to save the best model during training.
+    callbacks=[checkpoint, reduce_lr, early_stopping]
 )
-# calculates execution time
+# calculates total execution time
 elapsed = timeit.default_timer() - start_time
 print("Total time: ", elapsed, "seconds")
+
+# Generate Plots for training and validation loss using history that was returned
+plt.figure(figsize=(12, 6))
+plt.subplot(1, 2, 1)
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend()
+
+# Generate plots for training and validation accuracy using history that was returned
+plt.figure(figsize=(12, 6))
+plt.subplot(1, 2, 2)
+plt.plot(history.history['accuracy'], label='Training Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.legend()
+
+# Display the plots that are generated
+plt.show()
+
+# Make predictions using the test set
+predictions = model.predict(test_generator)
+
+# Show example of some of the test images along with their true and predicted classification
+plt.figure(figsize=(15, 12))
+for i in range(6):
+    img, true_label = test_generator.next()
+    # Sets filename of image
+    img_filename = test_generator.filenames[test_generator.batch_index - 1]
+    # Sets the predicted class name
+    true_class = list(test_generator.class_indices.keys())[list(test_generator.class_indices.values()).index(predictions[i].argmax())]
+    predicted_class = list(test_generator.class_indices.keys())[list(test_generator.class_indices.values()).index(predictions[i].argmax())]
+    plt.subplot(2, 3, i + 1)
+    plt.imshow(img[0])
+    plt.title(f"Image: {os.path.basename(img_filename)}\n"
+              f"True label: {true_class} \n Predicted Label: {predicted_class}")
+    plt.axis('off')
+    # Set layout to show images and display images with predictions and actual labels
+plt.tight_layout()
+plt.show()
+
+# Use the model on the test set to classify the test data
+test_loss, test_accuracy = model.evaluate(test_generator)
+print(f"Test Loss: {test_loss:0.4f}")
+print(f"Test Accuracy: {test_accuracy:0.4f}")

@@ -1,6 +1,6 @@
-# Attention-Based Convolutional Neural Network for Image Classification
+# Attention-Based Convolutional Neural Network for Real/Fake Image Classification
 
-This project implements a Convolutional Neural Network (CNN) with attention mechanisms using Keras to classify images as either class A or B. The attention mechanism helps the model focus on important parts of the images, improving classification accuracy. It uses `ImageDataGenerator` for data augmentation and includes visualization tools for training progress, test results, and the model's attention regions.
+This project implements a Convolutional Neural Network (CNN) with attention mechanisms using Keras to classify images as either Real or Fake (AI Generated). The attention mechanism helps the model focus on important parts of the images, improving classification accuracy. It uses `ImageDataGenerator` for data augmentation and includes visualization tools for training progress, test results, and the model's attention regions.
 
 ## Features
 - **Data Augmentation**: Uses Keras `ImageDataGenerator` for transformations (rescaling, shearing, zooming, and flipping).
